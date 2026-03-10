@@ -17,7 +17,52 @@ platforms = ["linux-64"]
 [tool.pixi.pypi-dependencies]
 mani_skill = { path = ".", editable = true }
 
-[tool.pixi.tasks]
-
 [tool.pixi.dependencies]
-python = "==3.10"
+python = "==3.9"
+setuptools = ">=80.9.0,<81"
+tensorboard = ">=2.11.2,<3"
+diffusers = ">=0.26.3,<0.30"
+wandb = ">=0.19.1,<0.20"
+
+
+[tool.pixi.tasks]
+# 模倣学習用実演データのDL
+# https://maniskill.readthedocs.io/en/latest/user_guide/learning_from_demos/setup.html
+download_demo = { cmd = [
+    "python",
+    "-m",
+    "mani_skill.utils.download_demo",
+    "\"PickCube-v1\"",
+]}
+# データのインストール（解凍）
+#install_demo = { cmd = "./replay_for_il_baselines.sh", cwd = "scripts/data_generation" }
+install_demo = { cmd = [
+  "python", "-m", "mani_skill.trajectory.replay_trajectory",
+  "--traj-path", "~/.maniskill/demos/PickCube-v1/motionplanning/trajectory.h5",
+  "--use-first-env-state", "-c", "pd_ee_delta_pos", "-o", "state",
+  "--save-traj", "--num-envs", "10", "-b", "physx_cpu",
+], cwd = "" }
+
+# 模倣学習（diffusion policy）
+# https://github.com/AmaneYamaguchi/ManiSkill/tree/main/examples/baselines/diffusion_policy
+train_dp = { cmd = [
+    "python",
+    "train.py",
+    "--env-id", "PickCube-v1",
+    "--demo-path", "~/.maniskill/demos/PickCube-v1/motionplanning/trajectory.state.pd_ee_delta_pos.physx_cpu.h5",
+    "--control-mode", "\"pd_ee_delta_pos\"", "--sim-backend", "\"physx_cpu\"", "--num-demos", "{{demos}}", "--max_episode_steps", "100",
+    "--total_iters", "30000",
+    "--exp-name", "diffusion_policy-PickCube-v1-state-{{demos}}_motionplanning_demos-{{seed}}",
+    "--no_capture_video",
+    #"--track", # wandbでトラッキングする場合はonにする
+], args = [
+    { "arg" = "demos", "default" = "1000" },
+    { "arg" = "seed", "default" = "1" },
+], cwd = "examples/baselines/diffusion_policy" }
+
+# 評価用
+# https://maniskill.readthedocs.io/en/latest/user_guide/learning_from_demos/setup.html
+eval = { cmd = [
+    "python",
+    "evaluate.py",
+], cwd = "scripts/eval" }

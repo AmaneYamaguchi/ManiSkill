@@ -1,0 +1,5 @@
+[default]
+entity = yamaama-the-university-of-tokyo
+project = maniskill-dp-practice
+base_url = https://api.wandb.ai
+

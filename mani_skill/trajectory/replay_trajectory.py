@@ -434,7 +434,7 @@ def _main(
         if num_procs > 1:
             new_traj_name = new_traj_name + "." + str(proc_id)
         if args.target_control_mode is not None:
-            ori_env = gym.make(env_id, **ori_env_kwargs)
+            ori_env = gym.make(env_id, **ori_env_kwargs).unwrapped
         else:
             ori_env = None
     else:

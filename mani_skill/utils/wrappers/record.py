@@ -318,6 +318,9 @@ class RecordEpisode(gym.Wrapper):
 
             self.base_env._after_simulation_step = wrapped_after_simulation_step
 
+    def __getattr__(self, name: str):
+        return getattr(self.env.unwrapped, name)
+
     @property
     def num_envs(self):
         return self.base_env.num_envs
