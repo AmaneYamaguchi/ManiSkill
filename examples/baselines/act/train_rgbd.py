@@ -104,8 +104,8 @@ class Args:
     """the number of episodes to evaluate the agent on"""
     num_eval_envs: int = 10
     """the number of parallel environments to evaluate the agent on"""
-    sim_backend: str = "cpu"
-    """the simulation backend to use for evaluation environments. can be "cpu" or "gpu"""
+    sim_backend: str = "physx_cpu"
+    """the simulation backend to use for evaluation environments. can be "physx_cpu" or "physx_cuda" """
     num_dataload_workers: int = 0
     """the number of workers to use for loading the training data in the torch dataloader"""
     control_mode: str = 'pd_joint_delta_pos'
@@ -348,6 +348,7 @@ class Agent(nn.Module):
         self.state_dim = env.single_observation_space['state'].shape[0]
         self.act_dim = env.single_action_space.shape[0]
         self.kl_weight = args.kl_weight
+        self.include_depth = args.include_depth
         self.normalize = T.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -378,7 +379,7 @@ class Agent(nn.Module):
         obs['rgb'] = self.normalize(obs['rgb'])
 
         # depth data
-        if args.include_depth:
+        if self.include_depth:
             obs['depth'] = obs['depth'].float()
 
         # forward pass
@@ -402,7 +403,7 @@ class Agent(nn.Module):
         obs['rgb'] = self.normalize(obs['rgb'])
 
         # depth data
-        if args.include_depth:
+        if self.include_depth:
             obs['depth'] = obs['depth'].float()
 
         # forward pass
