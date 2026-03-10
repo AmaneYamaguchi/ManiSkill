@@ -84,9 +84,40 @@ train_dp = { cmd = [
     { "arg" = "seed", "default" = "1" },
 ], cwd = "examples/baselines/diffusion_policy" }
 
-# 評価用
-# https://maniskill.readthedocs.io/en/latest/user_guide/learning_from_demos/setup.html
-eval = { cmd = [
+# 評価用（state: train_dp のチェックポイント）
+# 例: pixi run eval_dp demos=1000 seed=1 tag=best_eval_success_once
+eval_dp = { cmd = [
     "python",
     "evaluate.py",
-], cwd = "scripts/eval" }
+    "--checkpoint", "runs/diffusion_policy-PickCube-v1-state-{{demos}}_motionplanning_demos-{{seed}}/checkpoints/{{tag}}.pt",
+    "--env-id", "PickCube-v1",
+    "--obs-mode", "state",
+    "--control-mode", "\"pd_ee_delta_pos\"",
+    "--sim-backend", "\"physx_cpu\"",
+    "--max-episode-steps", "100",
+    "--num-eval-episodes", "100",
+    "--num-eval-envs", "10",
+], args = [
+    { "arg" = "demos", "default" = "1000" },
+    { "arg" = "seed", "default" = "1" },
+    { "arg" = "tag", "default" = "best_eval_success_once" },
+], cwd = "examples/baselines/diffusion_policy" }
+
+# 評価用（RGB: train_dp_rgb のチェックポイント）
+# 例: pixi run eval_dp_rgb demos=100 seed=1 tag=best_eval_success_once
+eval_dp_rgb = { cmd = [
+    "python",
+    "evaluate.py",
+    "--checkpoint", "runs/diffusion_policy-PickCube-v1-rgb-{{demos}}_motionplanning_demos-{{seed}}/checkpoints/{{tag}}.pt",
+    "--env-id", "PickCube-v1",
+    "--obs-mode", "rgb",
+    "--control-mode", "\"pd_ee_delta_pos\"",
+    "--sim-backend", "\"physx_cpu\"",
+    "--max-episode-steps", "100",
+    "--num-eval-episodes", "100",
+    "--num-eval-envs", "10",
+], args = [
+    { "arg" = "demos", "default" = "100" },
+    { "arg" = "seed", "default" = "1" },
+    { "arg" = "tag", "default" = "best_eval_success_once" },
+], cwd = "examples/baselines/diffusion_policy" }
