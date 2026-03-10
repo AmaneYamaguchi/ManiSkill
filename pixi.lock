@@ -1816,7 +1816,7 @@ packages:
 - pypi: ./
   name: mani-skill
   version: 3.0.0b22
-  sha256: 32ecc27052813413de47d1b89d1a9ab251a5833ea251ebdc4d872b0f17e2ed2a
+  sha256: ca3afdf400170ecc0839a004cecd6daf495edb4a67b76c3b4c8869799ffa00ee
   requires_dist:
   - numpy>=1.22
   - scipy
