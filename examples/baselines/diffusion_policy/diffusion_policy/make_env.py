@@ -53,9 +53,9 @@ def make_eval_envs(
             return thunk
 
         vector_cls = (
-            gym.vector.SyncVectorEnv
+            (lambda x: gym.vector.SyncVectorEnv(x, autoreset_mode="SameStep"))
             if num_envs == 1
-            else lambda x: gym.vector.AsyncVectorEnv(x, context="forkserver")
+            else lambda x: gym.vector.AsyncVectorEnv(x, context="forkserver", autoreset_mode="SameStep")
         )
         env = vector_cls(
             [

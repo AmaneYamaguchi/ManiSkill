@@ -95,7 +95,7 @@ def from_pd_joint_pos_to_ee(
         pbar.reset(total=n)
 
     ori_controller: CombinedController = ori_env.agent.controller
-    controller: CombinedController = env.agent.controller
+    controller: CombinedController = env.unwrapped.agent.controller
     assert (
         "arm" in ori_controller.controllers
     ), "Could not find the controller for the robot arm. This controller conversion tool requires there to be a key called 'arm' in the controller"
@@ -231,7 +231,7 @@ def from_pd_joint_pos(
         pbar.reset(total=n)
 
     ori_controller: CombinedController = ori_env.agent.controller
-    controller: CombinedController = env.agent.controller
+    controller: CombinedController = env.unwrapped.agent.controller
 
     info = {}
 
@@ -299,7 +299,7 @@ def from_pd_joint_delta_pos(
         pbar.reset(total=n)
 
     ori_controller: CombinedController = ori_env.agent.controller
-    controller: CombinedController = env.agent.controller
+    controller: CombinedController = env.unwrapped.agent.controller
     ori_arm_controller: PDJointPosController = ori_controller.controllers["arm"]
 
     assert output_mode == "pd_joint_pos", output_mode
