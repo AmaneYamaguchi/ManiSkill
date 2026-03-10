@@ -11,7 +11,7 @@ markers = [
 ]
 [tool.pixi.workspace]
 name = "ManiSkill"
-channels = ["conda-forge"]
+channels = ["pytorch", "nvidia", "conda-forge"]
 platforms = ["linux-64"]
 
 [tool.pixi.pypi-dependencies]
@@ -23,6 +23,9 @@ setuptools = ">=80.9.0,<81"
 tensorboard = ">=2.11.2,<3"
 diffusers = ">=0.26.3,<0.30"
 wandb = ">=0.19.1,<0.20"
+pytorch-cuda = "11.8.*"
+pytorch = ">=2.0"
+protobuf = "<4.0"
 
 
 [tool.pixi.tasks]
@@ -42,9 +45,30 @@ install_demo = { cmd = [
   "--use-first-env-state", "-c", "pd_ee_delta_pos", "-o", "state",
   "--save-traj", "--num-envs", "10", "-b", "physx_cpu",
 ], cwd = "" }
+# RGB観測形式のデータ生成（train_dp_rgbd の前に実行が必要）
+install_demo_rgb = { cmd = [
+  "python", "-m", "mani_skill.trajectory.replay_trajectory",
+  "--traj-path", "~/.maniskill/demos/PickCube-v1/motionplanning/trajectory.h5",
+  "--use-first-env-state", "-c", "pd_ee_delta_pos", "-o", "rgb",
+  "--save-traj", "--num-envs", "10", "-b", "physx_cpu",
+], cwd = "" }
 
 # 模倣学習（diffusion policy）
 # https://github.com/AmaneYamaguchi/ManiSkill/tree/main/examples/baselines/diffusion_policy
+train_dp_rgb = { cmd = [
+    "python",
+    "train_rgbd.py",
+    "--env-id", "PickCube-v1",
+    "--demo-path", "~/.maniskill/demos/PickCube-v1/motionplanning/trajectory.rgb.pd_ee_delta_pos.physx_cpu.h5",
+    "--control-mode", "\"pd_ee_delta_pos\"", "--sim-backend", "\"physx_cpu\"", "--num-demos", "{{demos}}", "--max_episode_steps", "100",
+    "--total_iters", "30000", "--obs-mode", "rgb",
+    "--exp-name", "diffusion_policy-PickCube-v1-rgb-{{demos}}_motionplanning_demos-{{seed}}",
+    #"--track",
+], args = [
+    { "arg" = "demos", "default" = "100" },
+    { "arg" = "seed", "default" = "1" },
+], cwd = "examples/baselines/diffusion_policy" }
+
 train_dp = { cmd = [
     "python",
     "train.py",
