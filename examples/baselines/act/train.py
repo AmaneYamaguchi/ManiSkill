@@ -182,33 +182,32 @@ class SmallDemoDataset_ACTPolicy(Dataset): # Load everything into GPU memory
         return len(self.slices)
 
     def get_norm_stats(self):
-        traj_idx, ts = self.slices[index]
-
-        # get observation at start_ts only
-        obs = self.trajectories['observations'][traj_idx][ts]
-        # get num_queries actions
-        act_seq = self.trajectories['actions'][traj_idx][ts:ts+self.num_queries]
-        action_len = act_seq.shape[0]
-
-        # Pad after the trajectory, so all the observations are utilized in training
-        if action_len < self.num_queries:
-            if 'delta_pos' in args.control_mode or args.control_mode == 'base_pd_joint_vel_arm_pd_joint_vel':
-                gripper_action = act_seq[-1, -1]
-                pad_action = torch.cat((self.pad_action_arm, gripper_action[None]), dim=0)
-                act_seq = torch.cat([act_seq, pad_action.repeat(self.num_queries-action_len, 1)], dim=0)
-                # making the robot (arm and gripper) stay still
-            elif not self.delta_control:
+        all_state_data = []
+        all_action_data = []
+        for traj_idx, ts in self.slices:
+            obs = self.trajectories['observations'][traj_idx][ts]
+            act_seq = self.trajectories['actions'][traj_idx][ts:ts+self.num_queries]
+            action_len = act_seq.shape[0]
+            if action_len < self.num_queries:
                 target = act_seq[-1]
                 act_seq = torch.cat([act_seq, target.repeat(self.num_queries-action_len, 1)], dim=0)
+            all_state_data.append(obs)
+            all_action_data.append(act_seq)
 
-        # normalize obs and act_seq
-        if not self.delta_control:
-            obs = (obs - self.norm_stats["state_mean"][0]) / self.norm_stats["state_std"][0]
-            act_seq = (act_seq - self.norm_stats["action_mean"]) / self.norm_stats["action_std"]
+        all_state_data = torch.stack(all_state_data)
+        all_action_data = torch.cat(all_action_data, dim=0)
+
+        state_mean = all_state_data.mean(dim=0, keepdim=True)
+        state_std = all_state_data.std(dim=0, keepdim=True)
+        state_std = torch.clip(state_std, 1e-2, torch.inf)
+
+        action_mean = all_action_data.mean(dim=0, keepdim=True)
+        action_std = all_action_data.std(dim=0, keepdim=True)
+        action_std = torch.clip(action_std, 1e-2, torch.inf)
 
         return {
-            'observations': obs,
-            'actions': act_seq,
+            "action_mean": action_mean, "action_std": action_std,
+            "state_mean": state_mean, "state_std": state_std,
         }
 
 
