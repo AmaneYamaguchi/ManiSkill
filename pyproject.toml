@@ -63,7 +63,7 @@ train_dp_rgb = { cmd = [
     "--control-mode", "\"pd_ee_delta_pos\"", "--sim-backend", "\"physx_cpu\"", "--num-demos", "{{demos}}", "--max_episode_steps", "100",
     "--total_iters", "30000", "--obs-mode", "rgb",
     "--exp-name", "diffusion_policy-PickCube-v1-rgb-{{demos}}_motionplanning_demos-{{seed}}",
-    #"--track",
+    "--track",
 ], args = [
     { "arg" = "demos", "default" = "100" },
     { "arg" = "seed", "default" = "1" },
@@ -78,7 +78,7 @@ train_dp = { cmd = [
     "--total_iters", "30000",
     "--exp-name", "diffusion_policy-PickCube-v1-state-{{demos}}_motionplanning_demos-{{seed}}",
     "--no_capture_video",
-    #"--track", # wandbでトラッキングする場合はonにする
+    "--track", # wandbでトラッキングする場合はonにする
 ], args = [
     { "arg" = "demos", "default" = "1000" },
     { "arg" = "seed", "default" = "1" },
