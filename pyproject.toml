@@ -26,6 +26,7 @@ wandb = ">=0.19.1,<0.20"
 pytorch-cuda = "11.8.*"
 pytorch = ">=2.0"
 protobuf = "<4.0"
+torchvision = ">=0.20.1,<0.21"
 
 
 [tool.pixi.tasks]
