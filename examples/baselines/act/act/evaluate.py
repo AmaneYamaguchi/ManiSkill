@@ -82,7 +82,10 @@ def evaluate(n: int, agent, eval_envs, eval_kwargs):
                 assert truncated.all() == truncated.any(), "all episodes should truncate at the same time for fair evaluation with other algorithms"
                 if isinstance(info["final_info"], dict):
                     for k, v in info["final_info"]["episode"].items():
-                        eval_metrics[k].append(v.float().cpu().numpy())
+                        if isinstance(v, torch.Tensor):
+                            eval_metrics[k].append(v.float().cpu().numpy())
+                        else:
+                            eval_metrics[k].append(np.array(v, dtype=np.float32))
                 else:
                     for final_info in info["final_info"]:
                         for k, v in final_info["episode"].items():
